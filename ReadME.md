@@ -215,7 +215,7 @@ The evaluation pipeline is implemented using:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/chunking-eval.git
+git clone https://github.com/gryg/JetBrains_chunking_evaluation_framework
 cd chunking-eval
 ```
 
@@ -314,7 +314,7 @@ chunking-eval/
 The main evaluation script (`run_evaluation.py`) can be used to run experiments with different configurations:
 
 ```bash
-python run_evaluation.py --corpus_path data/corpora/your_corpus.txt --questions_path data/questions_df.csv --corpus_id your_corpus_id
+python run_evaluation.py --corpus_path data/your_corpus.md --questions_path data/questions_df.csv --corpus_id your_corpus_id
 ```
 
 #### Command Line Arguments
@@ -334,7 +334,7 @@ python run_evaluation.py --corpus_path data/corpora/your_corpus.txt --questions_
 
 ```bash
 python run_evaluation.py \
-  --corpus_path data/corpora/wikitext.txt \
+  --corpus_path data/wikitext.txt \
   --questions_path data/questions_df.csv \
   --corpus_id wikitext \
   --embedding_model e5-small \
@@ -350,7 +350,7 @@ To run experiments with multiple configurations automatically:
 
 ```bash
 python run_evaluation.py \
-  --corpus_path data/corpora/wikitext.txt \
+  --corpus_path data/wikitext.txt \
   --questions_path data/questions_df.csv \
   --corpus_id wikitext \
   --embedding_model e5-small \
