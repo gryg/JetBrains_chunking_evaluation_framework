@@ -205,6 +205,177 @@ The evaluation pipeline is implemented using:
 - HuggingFace Transformers and SentenceTransformers for embeddings
 - Custom metrics implementation for MTEB-style evaluation
 
+## Installation and Setup
+
+### Prerequisites
+- Python 3.8 or higher
+- pip (Python package installer)
+
+### Dependencies Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/chunking-eval.git
+cd chunking-eval
+```
+
+2. Create a virtual environment (recommended):
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+```
+
+3. Install the package:
+
+You can install the package with different feature sets depending on your needs:
+
+**Basic Installation (core functionality only):**
+```bash
+pip install -e .
+```
+
+**Full Installation (all features):**
+```bash
+pip install -e ".[all]"
+```
+
+**Installation with Specific Features:**
+```bash
+# For sentence-transformers support:
+pip install -e ".[sentence-transformers]"
+
+# For HuggingFace transformers support:
+pip install -e ".[huggingface]"
+
+# For tokenizers support:
+pip install -e ".[tokenizers]"
+
+# For sentence chunking support:
+pip install -e ".[sentence-chunker]"
+```
+
+4. If using the SentenceChunker, download the spaCy model:
+```bash
+python -m spacy download en_core_web_sm
+```
+
+### Dependencies Details
+
+The package requires the following core dependencies:
+- numpy (>=1.20.0)
+- pandas (>=1.3.0)
+- scikit-learn (>=1.0.0)
+
+Optional dependencies include:
+- sentence-transformers (>=2.2.0) - For SentenceTransformer embedding
+- transformers (>=4.20.0) and torch (>=1.10.0) - For HuggingFace and E5 embeddings
+- tiktoken (>=0.3.0) - For token counting in FixedTokenChunker
+- spacy (>=3.4.0) - For sentence splitting in SentenceChunker
+
+### Project Structure
+```
+chunking-eval/
+├── chunkers/
+│   ├── __init__.py
+│   ├── base_chunker.py            # Base class for all chunking strategies
+│   ├── fixed_token_chunker.py     # Fixed-size token chunking implementation
+│   ├── recursive_chunker.py       # Recursive text splitting implementation
+│   └── sentence_chunker.py        # Sentence-based chunking implementation
+├── embeddings/
+│   ├── __init__.py
+│   ├── base_provider.py           # Base class for embedding providers
+│   ├── e5_provider.py             # Microsoft E5 embedding provider
+│   ├── huggingface.py             # HuggingFace transformer embeddings
+│   └── sentence_transformers.py   # SentenceTransformers embedding provider
+├── evaluation/
+│   ├── __init__.py
+│   ├── data_loader.py             # Utilities for loading data
+│   ├── enhanced_metrics.py        # MTEB-style evaluation metrics
+│   ├── enhanced_pipeline.py       # Extended evaluation pipeline
+│   ├── helpers.py                 # Helper functions for analysis
+│   ├── metrics.py                 # Basic evaluation metrics
+│   ├── pipeline.py                # Core evaluation pipeline
+│   └── retrieval.py               # Retrieval system implementations
+├── data/
+│   ├── wikitexts.md               # Text corpora for evaluation
+│   ├── pubmed.md                  # Text corpora for evaluation
+│   ├── finance.md                 # Text corpora for evaluation
+│   ├── chatlogs.md                # Text corpora for evaluation
+│   └── questions_df.csv           # Questions with reference excerpts
+├── run_evaluation.py              # Main script for running evaluations
+├── setup.py                       # Package installation configuration
+└── README.md
+```
+
+## Running the Evaluation
+
+### Using the Command Line
+
+The main evaluation script (`run_evaluation.py`) can be used to run experiments with different configurations:
+
+```bash
+python run_evaluation.py --corpus_path data/corpora/your_corpus.txt --questions_path data/questions_df.csv --corpus_id your_corpus_id
+```
+
+#### Command Line Arguments
+
+- `--corpus_path`: Path to the corpus file (default: "data/corpora/corpus.txt")
+- `--questions_path`: Path to the questions CSV file (default: "data/questions_df.csv")
+- `--corpus_id`: Corpus ID to filter questions (default: "corpus1")
+- `--embedding_model`: Embedding model to use ("minilm" or "e5-small") (default: "minilm")
+- `--output_file`: Path to save results (default: "chunking_results.json")
+- `--run_all_configs`: Flag to run all configuration combinations
+- `--chunk_size`: Size of chunks in tokens (default: 400)
+- `--chunk_overlap`: Overlap between chunks in tokens (default: 0)
+- `--num_retrieved`: Number of chunks to retrieve (default: 5)
+- `--chunker_type`: Type of chunker to use (default: "FixedTokenChunker")
+
+#### Example: Running a Single Configuration
+
+```bash
+python run_evaluation.py \
+  --corpus_path data/corpora/wikitext.txt \
+  --questions_path data/questions_df.csv \
+  --corpus_id wikitext \
+  --embedding_model e5-small \
+  --chunk_size 400 \
+  --chunk_overlap 100 \
+  --num_retrieved 5 \
+  --chunker_type SentenceChunker
+```
+
+#### Example: Running All Configurations
+
+To run experiments with multiple configurations automatically:
+
+```bash
+python run_evaluation.py \
+  --corpus_path data/corpora/wikitext.txt \
+  --questions_path data/questions_df.csv \
+  --corpus_id wikitext \
+  --embedding_model e5-small \
+  --run_all_configs
+```
+
+This will run all combinations of:
+- Chunkers: FixedTokenChunker, RecursiveCharacterTextSplitter, SentenceChunker
+- Chunk sizes: 200, 400, 600
+- Chunk overlaps: 0, 100, 200
+- Retrieved chunks: 5
+
+### Expected Input Data Format
+
+The questions CSV file should have the following columns:
+- `corpus_id`: Identifier for the corpus this question belongs to
+- `question`: The actual query text
+- `references`: JSON-encoded list of reference excerpts or dictionaries containing `content` field
+
+Example:
+```csv
+corpus_id,question,references
+wikitext,What is the capital of France?,["Paris is the capital and most populous city of France."]
+```
+
 ## Conclusion
 
 The chunking strategy and parameters significantly impact retrieval performance. While no single configuration is optimal for all use cases, this evaluation provides guidance for selecting appropriate chunking strategies based on specific requirements. The E5-small model consistently outperforms MiniLM, and adding chunk overlap generally improves results across all metrics.
